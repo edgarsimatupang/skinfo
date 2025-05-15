@@ -3,8 +3,9 @@ from transformers import pipeline
 
 def load_model():
     return pipeline(
-        "text-classification",
-        model="tabularisai/multilingual-sentiment-analysis"
+        "sentiment-analysis",  
+        model="tabularisai/multilingual-sentiment-analysis",
+        device=-1 
     )
 
 sentiment_pipeline = load_model()
@@ -22,9 +23,11 @@ if st.button("Analisis Sentimen"):
         with st.spinner("Sedang menganalisis..."):
             try:
                 results = sentiment_pipeline(user_input)
+                if not isinstance(results, list):
+                    results = [results]
                 for idx, res in enumerate(results):
-                    label = res['label']
-                    score = res['score']
+                    label = res.get('label', 'Unknown')
+                    score = res.get('score', 0)
                     st.success(f"**Hasil {idx+1}:** {label} (confidence: {score:.2f})")
             except Exception as e:
                 st.error(f"Terjadi error: {e}")
