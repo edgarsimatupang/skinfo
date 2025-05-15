@@ -1,16 +1,16 @@
 import streamlit as st
-from transformers import pipeline
+from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
 
 def load_model():
-    return pipeline(
-        "sentiment-analysis",  
-        model="tabularisai/multilingual-sentiment-analysis",
-        device=-1 
-    )
+    model_name = "tabularisai/multilingual-sentiment-analysis"
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForSequenceClassification.from_pretrained(model_name)
+    
+    return pipeline("text-classification", model=model, tokenizer=tokenizer)
 
 sentiment_pipeline = load_model()
 
-st.set_page_config(page_title="Multilingual Sentiment Analysis", page_icon="🌍")
+st.set_page_config(page_title="Multilingual Sentiment Analysis", page_icon="")
 st.title("Multilingual Sentiment Analysis")
 st.write("Model by `tabularisai/multilingual-sentiment-analysis`")
 
@@ -23,11 +23,9 @@ if st.button("Analisis Sentimen"):
         with st.spinner("Sedang menganalisis..."):
             try:
                 results = sentiment_pipeline(user_input)
-                if not isinstance(results, list):
-                    results = [results]
                 for idx, res in enumerate(results):
-                    label = res.get('label', 'Unknown')
-                    score = res.get('score', 0)
+                    label = res['label']
+                    score = res['score']
                     st.success(f"**Hasil {idx+1}:** {label} (confidence: {score:.2f})")
             except Exception as e:
                 st.error(f"Terjadi error: {e}")
